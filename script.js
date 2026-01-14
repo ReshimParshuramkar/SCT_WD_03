@@ -1,0 +1,69 @@
+let board = ["", "", "", "", "", "", "", "", ""];
+let currentPlayer = "X";
+let gameActive = false;
+let mode = "";
+
+const statusText = document.getElementById("status");
+const cells = document.querySelectorAll(".cell");
+
+const winPatterns = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+];
+
+function setMode(selectedMode) {
+    mode = selectedMode;
+    resetGame();
+    gameActive = true;
+    statusText.innerText = "Player X Turn";
+}
+
+function handleClick(index) {
+    if (!gameActive || board[index] !== "") return;
+
+    board[index] = currentPlayer;
+    cells[index].innerText = currentPlayer;
+
+    if (checkWin()) {
+        statusText.innerText = `Player ${currentPlayer} Wins!`;
+        gameActive = false;
+        return;
+    }
+
+    if (board.every(cell => cell !== "")) {
+        statusText.innerText = "It's a Draw!";
+        gameActive = false;
+        return;
+    }
+
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    statusText.innerText = `Player ${currentPlayer} Turn`;
+
+    if (mode === "cpu" && currentPlayer === "O") {
+        setTimeout(computerMove, 500);
+    }
+}
+
+function computerMove() {
+    let emptyCells = board
+        .map((val, idx) => val === "" ? idx : null)
+        .filter(v => v !== null);
+
+    let move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    handleClick(move);
+}
+
+function checkWin() {
+    return winPatterns.some(pattern => {
+        return pattern.every(index => board[index] === currentPlayer);
+    });
+}
+
+function resetGame() {
+    board = ["", "", "", "", "", "", "", "", ""];
+    currentPlayer = "X";
+    gameActive = false;
+    cells.forEach(cell => cell.innerText = "");
+    statusText.innerText = "Choose Game Mode";
+}
